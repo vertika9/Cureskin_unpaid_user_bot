@@ -1,0 +1,760 @@
+<title>Cureskin — Bot Quality Dashboard</title>
+<style>
+/* ─── Tokens ─────────────────────────────────────────────────────────────── */
+:root {
+  --gr:#EEF0F5; --card:#ffffff; --card2:#F7F8FB; --card3:#F0F2F7;
+  --bdr:rgba(13,17,35,.08); --bdr2:rgba(13,17,35,.05);
+  --ink:#0D1122; --ink2:#3E4A62; --muted:#7E8DA3;
+  --grid:#DDE1EC; --base:#C0C8D8;
+  --acc:#0D7A6B; --acc-l:rgba(13,122,107,.10); --acc-d:#0A6259;
+  --good:#147A39; --warn:#A84E06; --crit:#B82626;
+  --good-l:rgba(20,122,57,.10); --warn-l:rgba(168,78,6,.10); --crit-l:rgba(184,38,38,.10);
+  --good-t:#147A39; --warn-t:#A84E06; --crit-t:#B82626;
+  --sh:0 1px 3px rgba(13,17,35,.07),0 1px 2px rgba(13,17,35,.05);
+  --sh2:0 2px 8px rgba(13,17,35,.08);
+}
+:root[data-theme="dark"],
+@media (prefers-color-scheme:dark) { :root {
+  --gr:#090D17; --card:#111827; --card2:#161D2E; --card3:#1C2438;
+  --bdr:rgba(255,255,255,.08); --bdr2:rgba(255,255,255,.05);
+  --ink:#E8EDF7; --ink2:#8A97B2; --muted:#4E5C76;
+  --grid:#1C2438; --base:#2A3550;
+  --acc:#18BFA8; --acc-l:rgba(24,191,168,.12); --acc-d:#14A890;
+  --good:#18A84E; --warn:#D97B18; --crit:#E04040;
+  --good-l:rgba(24,168,78,.12); --warn-l:rgba(217,123,24,.12); --crit-l:rgba(224,64,64,.12);
+  --good-t:#18A84E; --warn-t:#D97B18; --crit-t:#E04040;
+  --sh:0 1px 4px rgba(0,0,0,.3),0 1px 3px rgba(0,0,0,.2);
+  --sh2:0 2px 12px rgba(0,0,0,.35);
+}}
+:root[data-theme="dark"] {
+  --gr:#090D17; --card:#111827; --card2:#161D2E; --card3:#1C2438;
+  --bdr:rgba(255,255,255,.08); --bdr2:rgba(255,255,255,.05);
+  --ink:#E8EDF7; --ink2:#8A97B2; --muted:#4E5C76;
+  --grid:#1C2438; --base:#2A3550;
+  --acc:#18BFA8; --acc-l:rgba(24,191,168,.12); --acc-d:#14A890;
+  --good:#18A84E; --warn:#D97B18; --crit:#E04040;
+  --good-l:rgba(24,168,78,.12); --warn-l:rgba(217,123,24,.12); --crit-l:rgba(224,64,64,.12);
+  --good-t:#18A84E; --warn-t:#D97B18; --crit-t:#E04040;
+  --sh:0 1px 4px rgba(0,0,0,.3),0 1px 3px rgba(0,0,0,.2);
+  --sh2:0 2px 12px rgba(0,0,0,.35);
+}
+:root[data-theme="light"] {
+  --gr:#EEF0F5; --card:#ffffff; --card2:#F7F8FB; --card3:#F0F2F7;
+  --bdr:rgba(13,17,35,.08); --bdr2:rgba(13,17,35,.05);
+  --ink:#0D1122; --ink2:#3E4A62; --muted:#7E8DA3;
+  --grid:#DDE1EC; --base:#C0C8D8;
+  --acc:#0D7A6B; --acc-l:rgba(13,122,107,.10); --acc-d:#0A6259;
+  --good:#147A39; --warn:#A84E06; --crit:#B82626;
+  --good-l:rgba(20,122,57,.10); --warn-l:rgba(168,78,6,.10); --crit-l:rgba(184,38,38,.10);
+  --good-t:#147A39; --warn-t:#A84E06; --crit-t:#B82626;
+  --sh:0 1px 3px rgba(13,17,35,.07),0 1px 2px rgba(13,17,35,.05);
+  --sh2:0 2px 8px rgba(13,17,35,.08);
+}
+
+/* ─── Reset & base ───────────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{color-scheme:light dark}
+body{font-family:system-ui,-apple-system,"Segoe UI",Helvetica,sans-serif;
+  background:var(--gr);color:var(--ink);font-size:13px;line-height:1.5;
+  -webkit-font-smoothing:antialiased}
+a{color:var(--acc);text-decoration:none}
+svg{display:block}
+
+/* ─── Site shell ─────────────────────────────────────────────────────────── */
+.site-header{background:var(--card);border-bottom:1px solid var(--bdr);
+  padding:0 24px;position:sticky;top:0;z-index:50;box-shadow:var(--sh)}
+.header-inner{max-width:1160px;margin:0 auto;height:52px;display:flex;
+  align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-dot{width:28px;height:28px;border-radius:7px;background:var(--acc);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.brand-dot svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round}
+.brand-name{font-size:14px;font-weight:700;color:var(--ink);letter-spacing:-.3px}
+.brand-sub{font-size:11px;color:var(--muted);margin-top:-1px}
+.header-right{display:flex;align-items:center;gap:8px}
+.theme-btn{background:none;border:1px solid var(--bdr);border-radius:6px;
+  padding:5px 8px;color:var(--muted);cursor:pointer;font-size:12px;
+  transition:color .15s,border-color .15s}
+.theme-btn:hover{color:var(--ink);border-color:var(--base)}
+.last-run{font-size:11px;color:var(--muted)}
+
+/* ─── Week tabs ──────────────────────────────────────────────────────────── */
+.tab-bar{background:var(--card);border-bottom:1px solid var(--bdr);
+  padding:0 24px;position:sticky;top:52px;z-index:40}
+.tab-inner{max-width:1160px;margin:0 auto;display:flex;gap:2px;overflow-x:auto;
+  scrollbar-width:none}
+.tab-inner::-webkit-scrollbar{display:none}
+.tab{display:flex;flex-direction:column;align-items:center;padding:10px 16px 9px;
+  border:none;background:none;color:var(--muted);cursor:pointer;font-size:13px;
+  font-weight:500;border-bottom:2px solid transparent;white-space:nowrap;
+  gap:3px;transition:color .15s,border-color .15s;margin-bottom:-1px}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--acc);border-bottom-color:var(--acc);font-weight:600}
+.tab-rate{font-size:9px;font-weight:700;letter-spacing:.3px;padding:1px 5px;
+  border-radius:3px;line-height:1.4}
+.tab-rate.good{background:var(--good-l);color:var(--good-t)}
+.tab-rate.warn{background:var(--warn-l);color:var(--warn-t)}
+.tab-rate.crit{background:var(--crit-l);color:var(--crit-t)}
+.tab-rate.na{background:var(--card3);color:var(--muted)}
+
+/* ─── Main content ───────────────────────────────────────────────────────── */
+.main{max-width:1160px;margin:0 auto;padding:20px 24px 60px}
+
+/* ─── Eyebrow label ──────────────────────────────────────────────────────── */
+.eyebrow{font-size:10px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:10px}
+
+/* ─── KPI row ────────────────────────────────────────────────────────────── */
+.kpi-row{display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+@media(max-width:840px){.kpi-row{grid-template-columns:1fr 1fr;}}
+@media(max-width:480px){.kpi-row{grid-template-columns:1fr;}}
+.kpi{background:var(--card);border:1px solid var(--bdr);border-radius:10px;
+  padding:16px 18px;box-shadow:var(--sh)}
+.kpi-lbl{font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:8px}
+.kpi-val{font-size:32px;font-weight:800;line-height:1;letter-spacing:-1.5px;
+  color:var(--ink);margin-bottom:6px;font-variant-numeric:tabular-nums}
+.kpi-val.s-good{color:var(--good-t)}
+.kpi-val.s-warn{color:var(--warn-t)}
+.kpi-val.s-crit{color:var(--crit-t)}
+.kpi-meta{font-size:11px;color:var(--muted)}
+.kpi-delta{font-size:11px;font-weight:600;margin-top:2px}
+.kpi-delta.up-bad{color:var(--crit-t)}
+.kpi-delta.dn-good{color:var(--good-t)}
+.kpi-delta.flat{color:var(--muted)}
+
+/* Rate KPI specialisation */
+.kpi-rate .kpi-val{font-size:36px}
+.rate-bar-wrap{margin-top:10px}
+.rate-bar-track{height:4px;border-radius:2px;background:var(--grid);overflow:hidden;position:relative}
+.rate-bar-fill{height:100%;border-radius:2px;transition:width .4s}
+.rate-bar-labels{display:flex;justify-content:space-between;margin-top:4px;
+  font-size:9px;color:var(--muted);font-variant-numeric:tabular-nums}
+.rate-ci{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* ─── Cards ──────────────────────────────────────────────────────────────── */
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:10px;
+  padding:20px;box-shadow:var(--sh);margin-bottom:16px}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;gap:12px;flex-wrap:wrap}
+.card-hdr h3{font-size:13px;font-weight:600;color:var(--ink);letter-spacing:-.1px}
+.card-hdr select{font-size:12px;padding:5px 10px;border:1px solid var(--bdr);
+  border-radius:6px;background:var(--card2);color:var(--ink);cursor:pointer;
+  font-family:inherit}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:680px){.two-col{grid-template-columns:1fr}}
+
+/* ─── Chart ──────────────────────────────────────────────────────────────── */
+.chart-wrap{width:100%;overflow:visible}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;padding-top:10px;
+  border-top:1px solid var(--bdr2)}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink2)}
+.leg-sw{width:18px;height:2px;border-radius:1px;flex-shrink:0}
+.leg-sq{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* ─── Topic bars ─────────────────────────────────────────────────────────── */
+.topic-row{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.topic-lbl{font-size:12px;color:var(--ink2);text-align:right;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;flex:0 0 160px;min-width:0}
+.topic-track{flex:1;height:12px;border-radius:2px;background:var(--grid);position:relative;overflow:hidden}
+.topic-fill{height:100%;border-radius:2px;background:var(--acc);transition:width .35s}
+.topic-pct{flex:0 0 60px;font-size:11px;color:var(--ink2);font-variant-numeric:tabular-nums}
+
+/* ─── Failure cards ──────────────────────────────────────────────────────── */
+.fail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.fail-card{background:var(--card2);border:1px solid var(--bdr);border-radius:8px;padding:14px}
+.fail-wk{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.spike-pill{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;
+  background:var(--crit-l);color:var(--crit-t);letter-spacing:.3px}
+.fail-item{padding:6px 0;border-bottom:1px solid var(--bdr2)}
+.fail-item:last-child{border-bottom:none;padding-bottom:0}
+.fail-cat{font-size:12px;font-weight:600;color:var(--ink);display:flex;
+  align-items:center;justify-content:space-between;gap:6px}
+.fail-n{font-size:10px;font-weight:600;background:var(--card3);border-radius:10px;
+  padding:1px 6px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.fail-ex{font-size:11px;color:var(--muted);margin-top:3px;font-style:italic;line-height:1.45}
+
+/* ─── Flagged table ──────────────────────────────────────────────────────── */
+.tbl-ctrl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.tbl-ctrl input,.tbl-ctrl select{
+  padding:7px 10px;border:1px solid var(--bdr);border-radius:6px;
+  background:var(--card2);color:var(--ink);font-size:12px;font-family:inherit}
+.tbl-ctrl input{flex:1;min-width:160px}
+.tbl-ctrl input::placeholder{color:var(--muted)}
+.tbl-cnt{font-size:11px;color:var(--muted);margin-left:auto}
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{text-align:left;padding:8px 10px;font-size:10px;font-weight:600;
+  letter-spacing:.5px;text-transform:uppercase;color:var(--muted);
+  border-bottom:2px solid var(--bdr);background:var(--card);
+  position:sticky;top:104px;white-space:nowrap;font-variant-numeric:tabular-nums}
+tbody tr{border-left:3px solid transparent;transition:background .1s}
+tbody tr.r-unsat{border-left-color:var(--crit)}
+tbody tr.r-noan{border-left-color:var(--warn)}
+tbody tr:hover td{background:var(--card2)}
+td{padding:9px 10px;border-bottom:1px solid var(--bdr2);vertical-align:top;
+  color:var(--ink2);line-height:1.4}
+tr:last-child td{border-bottom:none}
+.td-wk{font-size:10px;font-weight:600;color:var(--muted);white-space:nowrap;
+  letter-spacing:.3px;font-variant-numeric:tabular-nums}
+.td-type{white-space:nowrap;font-size:10px;font-weight:700;letter-spacing:.3px;
+  text-transform:uppercase}
+.td-type.t-u{color:var(--crit-t)}
+.td-type.t-n{color:var(--warn-t)}
+.td-q{color:var(--ink);font-size:12px}
+.td-a{font-size:12px;color:var(--ink2)}
+.td-r{font-size:11px;font-style:italic;color:var(--muted)}
+.expand-btn{cursor:pointer;user-select:none}
+.convo-wrap{display:none;padding:0}
+.convo-wrap.open{display:table-row}
+.convo-body{background:var(--card3);padding:12px 14px 12px 17px;
+  font-size:11px;line-height:1.7;border-top:1px solid var(--bdr2)}
+.cu{color:var(--acc);font-weight:500}
+.cb{color:var(--ink2)}
+.empty{text-align:center;padding:32px;color:var(--muted);font-size:12px}
+
+/* ─── Tooltip ────────────────────────────────────────────────────────────── */
+#tooltip{position:fixed;background:var(--card);border:1px solid var(--bdr);
+  border-radius:8px;padding:8px 12px;font-size:11px;color:var(--ink);
+  box-shadow:var(--sh2);pointer-events:none;z-index:200;display:none;
+  max-width:240px;line-height:1.5}
+#tooltip strong{display:block;font-size:12px;color:var(--ink);margin-bottom:3px}
+</style>
+
+<div id="tooltip"></div>
+
+
+<div id="loader" style="max-width:1160px;margin:80px auto;padding:0 24px">
+  <div style="text-align:center;padding:60px;color:var(--muted);font-size:14px">
+    Loading audit data…
+  </div>
+</div>
+
+<div id="run-panel" style="display:none;position:fixed;bottom:24px;right:24px;
+  background:var(--card);border:1px solid var(--bdr);border-radius:12px;
+  padding:16px 20px;box-shadow:var(--sh2);z-index:300;min-width:260px">
+  <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px">Run Latest Audit</div>
+  <div id="run-info" style="font-size:11px;color:var(--muted);margin-bottom:12px"></div>
+  <button id="run-btn" onclick="runAudit()"
+    style="width:100%;padding:9px;border-radius:7px;border:none;
+    background:var(--acc);color:#fff;font-size:13px;font-weight:600;
+    cursor:pointer;font-family:inherit">▶ Run Audit</button>
+  <pre id="run-log" style="display:none;margin-top:10px;font-size:10px;
+    background:var(--card3);border-radius:6px;padding:10px;overflow:auto;
+    max-height:200px;color:var(--ink2);white-space:pre-wrap;font-family:monospace"></pre>
+</div>
+<button onclick="document.getElementById('run-panel').style.display='block'"
+  style="position:fixed;bottom:24px;right:24px;padding:9px 16px;border-radius:8px;
+  border:1px solid var(--bdr);background:var(--card);color:var(--acc);font-size:12px;
+  font-weight:600;cursor:pointer;box-shadow:var(--sh);font-family:inherit;z-index:299"
+  id="run-fab">⚙ Run Audit</button>
+
+<header class="site-header" id="main-shell" style="display:none">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-dot">
+        <svg viewBox="0 0 16 16"><path d="M8 2a6 6 0 100 12A6 6 0 008 2z"/><path d="M5.5 8.5l1.5 1.5 3-3" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">Cureskin AI Quality</div>
+        <div class="brand-sub">Weekly Bot Audit Dashboard</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="last-run" id="last-run-label"></span>
+      <button class="theme-btn" id="theme-toggle" title="Toggle theme">◐</button>
+    </div>
+  </div>
+</header>
+
+<div class="tab-bar" id="tab-bar-el" style="display:none">
+  <div class="tab-inner" id="tab-inner"></div>
+</div>
+
+<div class="main" id="main-content" style="display:none">
+  <div class="kpi-row" id="kpi-row"></div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-hdr"><h3>Wrong-Answer Rate Trend</h3><span style="font-size:11px;color:var(--muted)">Shaded = ±95% CI</span></div>
+      <div class="chart-wrap" id="rate-chart"></div>
+      <div class="legend">
+        <span class="leg"><span class="leg-sw" style="background:var(--crit)"></span>Wrong-answer rate</span>
+        <span class="leg" style="font-size:10px;color:var(--muted)">Dashed = 12% quality target</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><h3>Exchange Volume</h3></div>
+      <div class="chart-wrap" id="vol-chart"></div>
+      <div class="legend">
+        <span class="leg"><span class="leg-sq" style="background:var(--acc)"></span>Answered</span>
+        <span class="leg"><span class="leg-sq" style="background:var(--warn)"></span>No Answer</span>
+        <span class="leg"><span class="leg-sq" style="background:var(--crit)"></span>Timeout</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr">
+      <h3>Top Query Topics</h3>
+      <select id="topic-wk">
+        <option value="2026-06-08">Jun 08</option>
+        <option value="2026-06-22">Jun 22</option>
+        <option value="2026-06-29" selected>Jun 29</option>
+      </select>
+    </div>
+    <div id="topic-chart"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr"><h3>Failure Patterns</h3></div>
+    <div class="fail-grid" id="fail-grid"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr"><h3>Flagged Exchanges</h3></div>
+    <div class="tbl-ctrl">
+      <input type="search" id="s-q" placeholder="Search questions or reasons…">
+      <select id="s-bucket"><option value="all">All types</option><option value="UNSATISFACTORY">Unsatisfactory</option><option value="NO_ANSWER">No Answer</option></select>
+      <select id="s-week"><option value="all">All weeks</option><option value="2026-06-02">Jun 02</option><option value="2026-06-08">Jun 08</option><option value="2026-06-22">Jun 22</option><option value="2026-06-29">Jun 29</option></select>
+      <span class="tbl-cnt" id="tbl-cnt"></span>
+    </div>
+    <div class="tbl-scroll"><div id="tbl"></div></div>
+  </div>
+</div>
+
+<script>
+
+async function runAudit() {
+  const btn = document.getElementById('run-btn');
+  const log = document.getElementById('run-log');
+  btn.disabled = true;
+  btn.textContent = '⏳ Running…';
+  log.style.display = 'block';
+  log.textContent = 'Starting audit…\n';
+  try {
+    const resp = await fetch('/api/run-audit', {method:'POST',headers:{'Content-Type':'application/json'}});
+    const result = await resp.json();
+    log.textContent = (result.stdout || '') + (result.stderr ? '\nSTDERR:\n' + result.stderr : '');
+    if (result.ok) {
+      btn.textContent = '✓ Done — reloading data';
+      btn.style.background = 'var(--good)';
+      setTimeout(async () => {
+        await loadData();
+        btn.disabled = false;
+        btn.textContent = '▶ Run Audit';
+        btn.style.background = '';
+      }, 800);
+    } else {
+      btn.textContent = '✗ Failed';
+      btn.style.background = 'var(--crit)';
+      btn.disabled = false;
+    }
+  } catch(e) {
+    log.textContent = 'Error: ' + e.message;
+    btn.textContent = '✗ Error';
+    btn.style.background = 'var(--crit)';
+    btn.disabled = false;
+  }
+}
+
+let DATA = null;
+
+// ── Boot (async) ─────────────────────────────────────────────────────────────
+async function loadData() {
+  const loader = document.getElementById('loader');
+  try {
+    const resp = await fetch('/api/data');
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    DATA = await resp.json();
+    loader.style.display = 'none';
+    document.getElementById('main-shell').style.display = '';
+    document.getElementById('tab-bar-el').style.display = '';
+    document.getElementById('main-content').style.display = '';
+    // populate run-panel info
+    fetch('/api/weeks').then(r=>r.json()).then(w=>{
+      document.getElementById('run-info').textContent =
+        w.newest_source_csv ? 'Source: ' + w.newest_source_csv : 'No source CSV found';
+    });
+    buildTabs();
+    render();
+  } catch(err) {
+    loader.innerHTML = `<div style="text-align:center;padding:60px;color:var(--crit-t)">
+      <div style="font-size:18px;font-weight:700;margin-bottom:8px">Failed to load data</div>
+      <div style="font-size:13px;color:var(--muted)">${err.message}</div>
+      <div style="margin-top:12px;font-size:12px;color:var(--muted)">
+        Make sure the server is running: <code>python3 server.py</code>
+      </div></div>`;
+  }
+}
+
+
+
+// ── Theme toggle ──────────────────────────────────────────────────────────────
+let theme = window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+function applyTheme(t) {
+  theme = t;
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('theme-toggle').title = t === 'dark' ? 'Switch to light' : 'Switch to dark';
+}
+document.getElementById('theme-toggle').addEventListener('click', () => applyTheme(theme === 'dark' ? 'light' : 'dark'));
+applyTheme(theme);
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let week = 'all';
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const SVG = 'http://www.w3.org/2000/svg';
+function s(tag, a={}, txt='') {
+  const e = document.createElementNS(SVG, tag);
+  for (const [k,v] of Object.entries(a)) e.setAttribute(k, v);
+  if (txt) e.textContent = txt;
+  return e;
+}
+function esc(str) {
+  return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function rateStatus(r) {
+  if (r == null) return {cls:'', var:'var(--muted)'};
+  if (r < 12)   return {cls:'s-good', var:'var(--good-t)'};
+  if (r < 18)   return {cls:'s-warn', var:'var(--warn-t)'};
+  return {cls:'s-crit', var:'var(--crit-t)'};
+}
+function tabRateCls(r) {
+  if (r == null) return 'na';
+  if (r < 12) return 'good';
+  if (r < 18) return 'warn';
+  return 'crit';
+}
+
+// ── Tooltip ───────────────────────────────────────────────────────────────────
+const TT = document.getElementById('tooltip');
+function tt(e, html) { TT.innerHTML = html; TT.style.display = 'block'; mv(e); }
+function mv(e) {
+  const x = e.clientX+14, y = e.clientY-10;
+  TT.style.left = (x + TT.offsetWidth > innerWidth ? x - TT.offsetWidth - 22 : x) + 'px';
+  TT.style.top = y + 'px';
+}
+function ht() { TT.style.display = 'none'; }
+
+// ── Build week tabs ───────────────────────────────────────────────────────────
+function buildTabs() {
+  const inner = document.getElementById('tab-inner');
+  inner.innerHTML = '';
+  const tabs = [{label:'All Weeks', key:'all', rate:null}, ...DATA.trend.map(d => ({label:d.label, key:d.week, rate:d.rate}))];
+  tabs.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (t.key === week ? ' active' : '');
+    btn.dataset.week = t.key;
+    const rateLabel = t.key === 'all' ? '' :
+      (t.rate != null ? `<span class="tab-rate ${tabRateCls(t.rate)}">${t.rate}%</span>` : `<span class="tab-rate na">—</span>`);
+    btn.innerHTML = `${esc(t.label)}${rateLabel}`;
+    btn.addEventListener('click', () => { week = t.key; buildTabs(); render(); });
+    inner.appendChild(btn);
+  });
+  // last run label
+  const latest = DATA.trend[DATA.trend.length-1];
+  document.getElementById('last-run-label').textContent = 'Last audit: ' + latest.label;
+}
+
+// ── KPI tiles ─────────────────────────────────────────────────────────────────
+function renderKPIs() {
+  const row = document.getElementById('kpi-row');
+  row.innerHTML = '';
+  const d = week === 'all' ? DATA.trend[DATA.trend.length-1] : DATA.trend.find(t => t.week === week);
+  if (!d) return;
+  const idx = DATA.trend.indexOf(d);
+  const prev = idx > 0 ? DATA.trend[idx-1] : null;
+
+  function kpi(label, valHtml, metaHtml='', extra='', cls='') {
+    const tile = document.createElement('div');
+    tile.className = 'kpi' + (cls ? ' ' + cls : '');
+    tile.innerHTML = `<div class="kpi-lbl">${label}</div><div class="kpi-val ${extra}">${valHtml}</div>${metaHtml}`;
+    row.appendChild(tile);
+    return tile;
+  }
+
+  // Rate tile (wider)
+  const st = rateStatus(d.rate);
+  const rateBar = d.rate != null ? Math.min(100, (d.rate / 25) * 100) : 0;
+  const barColor = d.rate != null ? (d.rate < 12 ? 'var(--good)' : d.rate < 18 ? 'var(--warn)' : 'var(--crit)') : 'var(--grid)';
+  let deltaHtml = '';
+  if (prev && prev.rate != null && d.rate != null) {
+    const diff = (d.rate - prev.rate).toFixed(1);
+    if (parseFloat(diff) > 0) deltaHtml = `<div class="kpi-delta up-bad">▲ ${diff}pp vs ${prev.label}</div>`;
+    else if (parseFloat(diff) < 0) deltaHtml = `<div class="kpi-delta dn-good">▼ ${Math.abs(diff)}pp vs ${prev.label}</div>`;
+    else deltaHtml = `<div class="kpi-delta flat">— same as ${prev.label}</div>`;
+  }
+  const rateMeta = `${deltaHtml}
+    <div class="rate-bar-wrap">
+      <div class="rate-bar-track">
+        <div class="rate-bar-fill" style="width:${rateBar}%;background:${barColor}"></div>
+      </div>
+      <div class="rate-bar-labels"><span>0%</span><span style="color:var(--good-t);font-weight:600">12% target</span><span>25%</span></div>
+    </div>
+    ${d.moe != null ? `<div class="rate-ci">±${d.moe.toFixed(2)}% (95% CI)</div>` : ''}`;
+  kpi('Wrong-Answer Rate', d.rate != null ? d.rate.toFixed(1)+'%' : '—', rateMeta, st.cls, 'kpi-rate');
+
+  function delta(cur, prv, field, upBad=true) {
+    if (!prv || prv[field]==null || cur[field]==null) return '';
+    const diff = cur[field] - prv[field];
+    if (diff === 0) return `<div class="kpi-delta flat">— vs ${prv.label}</div>`;
+    const cls = (diff > 0) === upBad ? 'up-bad' : 'dn-good';
+    const sign = diff > 0 ? '▲' : '▼';
+    return `<div class="kpi-delta ${cls}">${sign} ${Math.abs(diff).toLocaleString()} vs ${prv.label}</div>`;
+  }
+
+  kpi('Unsatisfactory', d.unsat != null ? d.unsat : '—',
+    `${delta(d, prev, 'unsat', true)}
+     <div class="kpi-meta">of ${(d.sample||1000).toLocaleString()} sampled</div>`);
+  kpi('Total Exchanges', d.total ? d.total.toLocaleString() : '—',
+    `${delta(d, prev, 'total', false)}`);
+  kpi('No-Answer', d.no_answer != null ? d.no_answer : '—',
+    `${delta(d, prev, 'no_answer', true)}
+     ${d.no_answer_pct != null ? `<div class="kpi-meta">${d.no_answer_pct.toFixed(1)}% of total</div>` : ''}`);
+  kpi('Timeouts', d.timeout != null ? d.timeout : '—',
+    `${delta(d, prev, 'timeout', true)}`);
+}
+
+// ── Rate trend chart ──────────────────────────────────────────────────────────
+function drawRate() {
+  const wrap = document.getElementById('rate-chart');
+  wrap.innerHTML = '';
+  const pts = DATA.trend.filter(d => d.rate != null);
+  if (!pts.length) { wrap.innerHTML='<div class="empty">No rate data yet</div>'; return; }
+
+  const W=500,H=180,pL=46,pR=40,pT=16,pB=38;
+  const cW=W-pL-pR, cH=H-pT-pB;
+  const yMax=30;
+  const yS=v=>cH-((v/yMax)*cH);
+  const xS=i=>pts.length<2?cW/2:(i/(pts.length-1))*cW;
+
+  const svg=s('svg',{viewBox:`0 0 ${W} ${H}`,style:'width:100%;height:auto;overflow:visible'});
+  const g=s('g',{transform:`translate(${pL},${pT})`}); svg.appendChild(g);
+
+  // Grid + y-ticks
+  [0,5,10,15,20,25,30].forEach(t=>{
+    const y=yS(t);
+    g.appendChild(s('line',{x1:0,y1:y,x2:cW,y2:y,stroke:'var(--grid)','stroke-width':1}));
+    g.appendChild(s('text',{x:-8,y:y+4,'text-anchor':'end',fill:'var(--muted)','font-size':10},t+'%'));
+  });
+
+  // 12% target
+  const ty=yS(12);
+  g.appendChild(s('line',{x1:0,y1:ty,x2:cW,y2:ty,stroke:'var(--good)','stroke-width':1,'stroke-dasharray':'4 3',opacity:'.55'}));
+  g.appendChild(s('text',{x:cW+3,y:ty+4,fill:'var(--good)','font-size':9,'font-weight':600},'12%'));
+
+  // MOE band
+  const up=pts.map((p,i)=>`${xS(i)},${yS(Math.min(yMax,p.rate+p.moe))}`).join(' ');
+  const dn=[...pts].reverse().map((p,i)=>`${xS(pts.length-1-i)},${yS(Math.max(0,p.rate-p.moe))}`).join(' ');
+  g.appendChild(s('polygon',{points:up+' '+dn,fill:'var(--crit)',opacity:'.10'}));
+
+  // Line
+  const lp=pts.map((p,i)=>`${xS(i)},${yS(p.rate)}`).join(' L ');
+  g.appendChild(s('path',{d:'M '+lp,stroke:'var(--crit)','stroke-width':2.5,fill:'none','stroke-linejoin':'round','stroke-linecap':'round'}));
+
+  // Baseline
+  g.appendChild(s('line',{x1:0,y1:cH,x2:cW,y2:cH,stroke:'var(--base)','stroke-width':1}));
+
+  // Dots
+  pts.forEach((p,i)=>{
+    const cx=xS(i), cy=yS(p.rate);
+    const sel=week===p.week;
+    const fill=rateStatus(p.rate).var;
+    g.appendChild(s('circle',{cx,cy,r:7,fill:'var(--card)'}));
+    const dot=s('circle',{cx,cy,r:5,fill:sel?'var(--warn)':fill,style:'cursor:pointer'});
+    dot.addEventListener('mousemove',e=>tt(e,`<strong>${p.label}</strong>Rate: ${p.rate}% ±${p.moe}%<br>Unsatisfactory: ${p.unsat} / ${p.sample}`));
+    dot.addEventListener('mouseleave',ht);
+    g.appendChild(dot);
+    if (p.rate>=18) {
+      const lb=s('text',{x:cx,y:cy-11,'text-anchor':'middle',fill:'var(--crit-t)','font-size':10,'font-weight':700});
+      lb.textContent=p.rate+'%'; g.appendChild(lb);
+    }
+  });
+
+  // X labels
+  pts.forEach((p,i)=>{
+    g.appendChild(s('text',{x:xS(i),y:cH+15,'text-anchor':'middle',fill:'var(--muted)','font-size':11},p.label));
+  });
+
+  wrap.appendChild(svg);
+}
+
+// ── Volume bars ───────────────────────────────────────────────────────────────
+function drawVol() {
+  const wrap=document.getElementById('vol-chart');
+  wrap.innerHTML='';
+  const pts=DATA.trend.filter(d=>d.answered!=null);
+  if(!pts.length){wrap.innerHTML='<div class="empty">No breakdown data</div>';return;}
+
+  const W=480,H=180,pL=46,pR=16,pT=16,pB=38;
+  const cW=W-pL-pR, cH=H-pT-pB;
+  const yMax=Math.ceil(Math.max(...pts.map(d=>d.total))/1000)*1000;
+  const yS=v=>cH-(v/yMax)*cH;
+
+  const svg=s('svg',{viewBox:`0 0 ${W} ${H}`,style:'width:100%;height:auto;overflow:visible'});
+  const g=s('g',{transform:`translate(${pL},${pT})`}); svg.appendChild(g);
+
+  const yTk=[0,1000,2000,3000,4000].filter(t=>t<=yMax);
+  yTk.forEach(t=>{
+    const y=yS(t);
+    g.appendChild(s('line',{x1:0,y1:y,x2:cW,y2:y,stroke:'var(--grid)','stroke-width':1}));
+    g.appendChild(s('text',{x:-6,y:y+4,'text-anchor':'end',fill:'var(--muted)','font-size':10},t===0?'0':t/1000+'k'}));
+  });
+  g.appendChild(s('line',{x1:0,y1:cH,x2:cW,y2:cH,stroke:'var(--base)','stroke-width':1}));
+
+  const bW=Math.min(36,(cW/pts.length)*0.5);
+  const cols=['var(--acc)','var(--warn)','var(--crit)'];
+  const lbls=['Answered','No Answer','Timeout'];
+
+  pts.forEach((d,i)=>{
+    const cx=(i+0.5)*(cW/pts.length);
+    const x=cx-bW/2;
+    const parts=[{v:d.answered,c:cols[0],l:lbls[0]},{v:d.no_answer,c:cols[1],l:lbls[1]},{v:d.timeout,c:cols[2],l:lbls[2]}]
+      .filter(p=>p.v!=null&&p.v>0);
+    let curY=cH;
+    parts.forEach((p,pi)=>{
+      const bh=(p.v/yMax)*cH;
+      const y=curY-bh;
+      if(pi>0){const gap=s('rect',{x,y:curY-1,width:bW,height:2,fill:'var(--card)'});g.appendChild(gap);}
+      const r=s('rect',{x,y,width:bW,height:bh,fill:p.c,rx:pi===parts.length-1?3:0,style:'cursor:pointer'});
+      r.addEventListener('mousemove',e=>tt(e,`<strong>${d.label} — ${p.l}</strong>${p.v.toLocaleString()} exchanges`));
+      r.addEventListener('mouseleave',ht);
+      g.appendChild(r);
+      curY=y;
+    });
+    g.appendChild(s('text',{x:cx,y:cH+15,'text-anchor':'middle',fill:'var(--muted)','font-size':11},d.label));
+  });
+  wrap.appendChild(svg);
+}
+
+// ── Topic bars ────────────────────────────────────────────────────────────────
+function drawTopics(wk) {
+  const wrap=document.getElementById('topic-chart');
+  wrap.innerHTML='';
+  const data=DATA.topics[wk];
+  if(!data){wrap.innerHTML='<div class="empty">Topic data not available for this week</div>';return;}
+  const sorted=[...data].sort((a,b)=>b.count-a.count);
+  const maxV=sorted[0].count;
+  sorted.forEach(t=>{
+    const row=document.createElement('div');
+    row.className='topic-row';
+    const pct=Math.max(2,(t.count/maxV)*100);
+    row.innerHTML=`<div class="topic-lbl">${esc(t.topic)}</div>
+      <div class="topic-track"><div class="topic-fill" style="width:${pct}%"></div></div>
+      <div class="topic-pct">${t.count} <span style="color:var(--muted)">(${t.pct}%)</span></div>`;
+    row.querySelector('.topic-fill').addEventListener('mousemove',
+      e=>tt(e,`<strong>${esc(t.topic)}</strong>${t.count} of 1,000 questions — ${t.pct}%`));
+    row.querySelector('.topic-fill').addEventListener('mouseleave',ht);
+    wrap.appendChild(row);
+  });
+}
+
+// ── Failures ──────────────────────────────────────────────────────────────────
+function renderFails() {
+  const grid=document.getElementById('fail-grid');
+  grid.innerHTML='';
+  const wks=week==='all'?Object.keys(DATA.failures):[week];
+  wks.forEach(w=>{
+    const f=DATA.failures[w]; if(!f)return;
+    const td=DATA.trend.find(t=>t.week===w);
+    const spike=td&&td.rate>=18;
+    const card=document.createElement('div');
+    card.className='fail-card';
+    const wkLabel=td?td.label:w;
+    card.innerHTML=`<div class="fail-wk">${wkLabel}${spike?'<span class="spike-pill">SPIKE</span>':''}</div>`;
+    f.forEach(item=>{
+      const d=document.createElement('div');
+      d.className='fail-item';
+      d.innerHTML=`<div class="fail-cat">${esc(item.cat)}${item.count!=null?`<span class="fail-n">${item.count}</span>`:''}</div>
+        <div class="fail-ex">"${esc(item.example)}"</div>`;
+      card.appendChild(d);
+    });
+    grid.appendChild(card);
+  });
+}
+
+// ── Flagged table ─────────────────────────────────────────────────────────────
+function renderTable() {
+  const search=(document.getElementById('s-q').value||'').toLowerCase();
+  const bucket=document.getElementById('s-bucket').value;
+  const wkFilter=document.getElementById('s-week').value;
+  const wrap=document.getElementById('tbl');
+
+  let rows=[];
+  const wks=wkFilter!=='all'?[wkFilter]:
+    (week!=='all'?[week]:Object.keys(DATA.flagged));
+  wks.forEach(w=>(DATA.flagged[w]||[]).forEach(r=>rows.push({...r,week:w})));
+  if(bucket!=='all')rows=rows.filter(r=>r.bucket===bucket);
+  if(search)rows=rows.filter(r=>r.q.toLowerCase().includes(search)||r.reason.toLowerCase().includes(search));
+
+  document.getElementById('tbl-cnt').textContent=rows.length.toLocaleString()+' exchanges';
+
+  if(!rows.length){wrap.innerHTML='<div class="empty">No exchanges match the current filters.</div>';return;}
+  const LIMIT=250;
+  const table=document.createElement('table');
+  const thead=document.createElement('thead');
+  thead.innerHTML='<tr><th>Week</th><th>Type</th><th style="min-width:200px">User Question</th><th style="min-width:220px">Bot Answer (preview)</th><th style="min-width:140px">Reason</th></tr>';
+  table.appendChild(thead);
+  const tbody=document.createElement('tbody');
+
+  rows.slice(0,LIMIT).forEach((r,idx)=>{
+    const tw=DATA.trend.find(t=>t.week===r.week);
+    const isU=r.bucket==='UNSATISFACTORY', isN=r.bucket==='NO_ANSWER';
+    const trClass=isU?'r-unsat':isN?'r-noan':'';
+
+    const tr=document.createElement('tr');
+    tr.className=trClass+' expand-btn';
+    tr.innerHTML=`<td class="td-wk">${tw?tw.label:r.week}</td>
+      <td class="td-type ${isU?'t-u':'t-n'}">${isU?'UNSAT':'NO ANS'}</td>
+      <td class="td-q">${esc(r.q.slice(0,140)+(r.q.length>140?'…':''))}</td>
+      <td class="td-a">${esc(r.a.slice(0,160)+(r.a.length>160?'…':''))}</td>
+      <td class="td-r">${esc(r.reason.slice(0,100)+(r.reason.length>100?'…':''))}</td>`;
+
+    const convoTr=document.createElement('tr');
+    convoTr.className='convo-wrap';
+    const convoTd=document.createElement('td');
+    convoTd.colSpan=5; convoTd.style.padding='0';
+    const lines=(r.convo||'').split(' / ').map(l=>{
+      if(l.startsWith('[USER]: '))return`<div class="cu">👤 ${esc(l.slice(8))}</div>`;
+      if(l.startsWith('[BOT]: '))return`<div class="cb">🤖 ${esc(l.slice(7))}</div>`;
+      return`<div>${esc(l)}</div>`;
+    }).join('');
+    convoTd.innerHTML=`<div class="convo-body">${lines||'(no conversation recorded)'}</div>`;
+    convoTr.appendChild(convoTd);
+
+    tr.addEventListener('click',()=>{
+      convoTr.classList.toggle('open');
+    });
+    tbody.appendChild(tr);
+    tbody.appendChild(convoTr);
+  });
+
+  if(rows.length>LIMIT){
+    const info=document.createElement('tr');
+    info.innerHTML=`<td colspan="5" class="empty">Showing ${LIMIT} of ${rows.length}. Use filters to narrow down.</td>`;
+    tbody.appendChild(info);
+  }
+
+  table.appendChild(tbody);
+  wrap.innerHTML=''; wrap.appendChild(table);
+}
+
+// ── Full render ───────────────────────────────────────────────────────────────
+function render() {
+  renderKPIs();
+  drawRate();
+  drawVol();
+  drawTopics(document.getElementById('topic-wk').value);
+  renderFails();
+  renderTable();
+}
+
+// ── Wire controls ─────────────────────────────────────────────────────────────
+document.getElementById('topic-wk').addEventListener('change',e=>drawTopics(e.target.value));
+['s-q','s-bucket','s-week'].forEach(id=>document.getElementById(id).addEventListener('input',renderTable));
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+loadData();
+</script>
